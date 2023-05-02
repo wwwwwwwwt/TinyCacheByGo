@@ -2,10 +2,10 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 14:29:18
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-02 21:16:03
- * @FilePath: /geecache/README.md
+ * @LastEditTime: 2023-05-02 22:34:16
+ * @FilePath: /TinyCacheByGo/README.md
 -->
-# 基于Go的简易缓存框架🚀
+# 基于Go的简易分布式缓存框架🚀
 
 仿照Go 语言的groupcache，进行开发
 

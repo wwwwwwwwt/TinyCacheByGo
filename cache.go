@@ -2,8 +2,8 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 20:11:28
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-02 21:08:27
- * @FilePath: /geecache/cache.go
+ * @LastEditTime: 2023-05-03 00:13:36
+ * @FilePath: /TinyCacheByGo/cache.go
  */
 package geecache
 
@@ -43,6 +43,3 @@ func (c *cache) get(key string) (value ByteView, ok bool) {
 	}
 	return
 }
-
-//-----------------------------------------------------------------
-// 主体结构Group负责与外部交互，控制缓存储存与获取的主流程
