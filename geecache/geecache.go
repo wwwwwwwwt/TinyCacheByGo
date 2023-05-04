@@ -2,8 +2,8 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 22:44:01
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-03 01:10:05
- * @FilePath: /TinyCacheByGo/geecache.go
+ * @LastEditTime: 2023-05-04 18:45:07
+ * @FilePath: /Geecache/geecache/geecache.go
  */
 package geecache
 
@@ -36,6 +36,7 @@ type Group struct {
 	name      string
 	getter    Getter
 	mainCache cache
+	peers     PeerPicker
 }
 
 var (
@@ -96,8 +97,31 @@ func (g *Group) Get(key string) (ByteView, error) {
 	return g.load(key)
 }
 
-func (g *Group) load(key string) (ByteView, error) {
+func (g *Group) RegisterPeers(peers PeerPicker) {
+	if g.peers != nil {
+		panic("RegisterPeerPicker called more than once")
+	}
+	g.peers = peers
+}
+
+func (g *Group) load(key string) (value ByteView, err error) {
+	if g.peers != nil {
+		if peer, ok := g.peers.PickPeer(key); ok {
+			if value, err = g.getFromPeer(peer, key); err == nil {
+				return value, nil
+			}
+			log.Println("[GeeCache] Failed to get from peer", err)
+		}
+	}
 	return g.getLocally(key)
+}
+
+func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
+	bytes, err := peer.Get(g.name, key)
+	if err != nil {
+		return ByteView{}, err
+	}
+	return ByteView{b: bytes}, nil
 }
 
 func (g *Group) getLocally(key string) (ByteView, error) {
@@ -115,3 +139,27 @@ func (g *Group) getLocally(key string) (ByteView, error) {
 func (g *Group) populateCache(key string, value ByteView) {
 	g.mainCache.add(key, value)
 }
+
+//每执行一次main函数就是起一个节点服务                 本地用户交互前端连接绑定了一个gee节点，其余节点皆为单纯gee缓存数据节点
+// Overall flow char										     requsets			先看local有没有		        local
+// gee := createGroup() --------> /api Service : 9999 ------------------------------> gee.Get(key) ------> g.mainCache.Get(key)
+// 						|											^					|
+// 						|											|					|remote 查看远程节点有没有的逻辑
+// 						v											|					v
+// 				cache Service : 800x								|			g.peers.PickPeer(key)通过一致性哈希找到这个key应该落在的真正节点地址
+// 						|create hash ring & init peerGetter			|					|
+// 						|registry peers write in g.peer				|					|p.httpGetters[p.hashRing(key)]
+// 						v											|					|
+//			httpPool.Set(otherAddrs...)								|					v
+// 		g.peers = gee.RegisterPeers(httpPool)						|			g.getFromPeer(peerGetter, key)//通过http向这个真正节点发送请求
+// 						|											|					|
+// 						|											|					|
+// 						v											|					v
+// 		http.ListenAndServe("localhost:800x", httpPool)<------------+--------------peerGetter.Get(key) //这个节点查看本地有没有，没有就在这个节点本地加载
+// 						|											|
+// 						|requsets									|
+// 						v											|
+// 					p.ServeHttp(w, r)								|
+// 						|											|
+// 						|url.parse()								|
+// 						|--------------------------------------------
