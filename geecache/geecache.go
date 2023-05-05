@@ -2,7 +2,7 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 22:44:01
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-05 11:46:31
+ * @LastEditTime: 2023-05-05 14:59:26
  * @FilePath: /TinyCacheByGo/geecache/geecache.go
  */
 package geecache
@@ -170,10 +170,10 @@ func (g *Group) populateCache(key string, value ByteView) {
 // 						v											|					v
 // 				cache Service : 800x								|			g.peers.PickPeer(key)通过一致性哈希找到这个key应该落在的真正节点地址
 // 						|create hash ring & init peerGetter			|					|
-// 						|registry peers write in g.peer				|					|p.httpGetters[p.hashRing(key)]
+// 						|registry peers write in g.peer				|					|p.grpcGetters[p.hashRing(key)]
 // 						v											|					|
-//			httpPool.Set(otherAddrs...)								|					v
-// 		g.peers = gee.RegisterPeers(httpPool)						|			g.getFromPeer(peerGetter, key)//通过http向这个真正节点发送请求
+//			grpcPool.Set(otherAddrs...)								|					v
+// 		g.peers = gee.RegisterPeers(grpcPool)						|			g.getFromPeer(peerGetter, key)//通过grpc向这个真正节点发送请求
 // 						|											|					|
 // 						|											|					|
 // 						v											|					v
