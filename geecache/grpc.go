@@ -59,7 +59,6 @@ func (p *GrpcPool) Set(peers ...string) {
 }
 
 func (p *GrpcPool) PickPeer(key string) (PeerGetter, bool) {
-	log.Println("111111111")
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if peer := p.peers.Get(key); peer != "" && peer != p.self {

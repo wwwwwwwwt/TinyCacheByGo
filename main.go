@@ -2,7 +2,7 @@
  * @Author: zzzzztw
  * @Date: 2023-05-04 12:43:16
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-05 11:56:49
+ * @LastEditTime: 2023-05-05 12:08:55
  * @FilePath: /TinyCacheByGo/main.go
  */
 package main
@@ -21,6 +21,9 @@ var db = map[string]string{
 	"Sam":  "567",
 }
 
+//---------------------------------------------------------------------------
+// use HTTP
+/*
 func createGroup() *geecache.Group {
 	return geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
 		func(key string) ([]byte, error) {
@@ -32,7 +35,7 @@ func createGroup() *geecache.Group {
 		}))
 }
 
-/*func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
+func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
 	peers := geecache.NewHTTPPool(addr)
 	peers.Set(addrs...)
 	gee.RegisterPeers(peers)
@@ -84,6 +87,19 @@ func main() {
 	startCacheServer(addrMap[port], []string(addrs), gee)
 }
 */
+
+//---------------------------------------------------------------------------
+// use grpc
+func createGroup() *geecache.Group {
+	return geecache.NewGroup("scores", 2<<10, geecache.GetterFunc(
+		func(key string) ([]byte, error) {
+			log.Println("[SlowDB] search key", key)
+			if v, ok := db[key]; ok {
+				return []byte(v), nil
+			}
+			return nil, fmt.Errorf("%s not exist", key)
+		}))
+}
 func startAPIServer(apiAddr string, gee *geecache.Group) {
 	http.Handle("/api", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
