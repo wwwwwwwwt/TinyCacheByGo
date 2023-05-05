@@ -3,7 +3,7 @@
  # @Author: zzzzztw
  # @Date: 2023-05-04 18:45:53
  # @LastEditors: Do not edit
- # @LastEditTime: 2023-05-04 18:46:03
+ # @LastEditTime: 2023-05-05 08:46:56
  # @FilePath: /Geecache/run.sh
 ### 
 trap "rm server;kill 0" EXIT
@@ -18,5 +18,24 @@ echo ">>> start test"
 curl "http://localhost:9999/api?key=Tom" &
 curl "http://localhost:9999/api?key=Tom" &
 curl "http://localhost:9999/api?key=Tom" &
-
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
 wait

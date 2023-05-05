@@ -2,7 +2,7 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 22:44:01
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-04 18:45:07
+ * @LastEditTime: 2023-05-05 08:45:36
  * @FilePath: /Geecache/geecache/geecache.go
  */
 package geecache
@@ -10,6 +10,7 @@ package geecache
 import (
 	"fmt"
 	"geecache/lru"
+	"geecache/singleflight"
 	"log"
 	"sync"
 )
@@ -37,6 +38,7 @@ type Group struct {
 	getter    Getter
 	mainCache cache
 	peers     PeerPicker
+	loader    *singleflight.Group
 }
 
 var (
@@ -56,6 +58,7 @@ func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 		name:      name,
 		getter:    getter,
 		mainCache: cache{lru: lru.New(cacheBytes, nil)},
+		loader:    &singleflight.Group{},
 	}
 	groups[name] = group
 	return group
@@ -105,15 +108,28 @@ func (g *Group) RegisterPeers(peers PeerPicker) {
 }
 
 func (g *Group) load(key string) (value ByteView, err error) {
-	if g.peers != nil {
-		if peer, ok := g.peers.PickPeer(key); ok {
-			if value, err = g.getFromPeer(peer, key); err == nil {
-				return value, nil
+
+	/*
+		Do的逻辑是无论谁进来，都会在这等来同一个锁，这样高并发下是否会影响性能呢
+		答：不会，执行load操作时时缓存没有命中的时候才执行，并不会影响缓存本身的性能，缓存没命中自然要获取说句，要么等上游返回要么等锁
+	*/
+	viewi, err := g.loader.Do(key, func() (interface{}, error) {
+		if g.peers != nil {
+			if peer, ok := g.peers.PickPeer(key); ok {
+				if value, err = g.getFromPeer(peer, key); err == nil {
+					return value, nil
+				}
+				log.Println("[GeeCache] Failed to get from peer", err)
 			}
-			log.Println("[GeeCache] Failed to get from peer", err)
 		}
+
+		return g.getLocally(key)
+	})
+
+	if err == nil {
+		return viewi.(ByteView), nil
 	}
-	return g.getLocally(key)
+	return
 }
 
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
