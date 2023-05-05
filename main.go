@@ -2,8 +2,8 @@
  * @Author: zzzzztw
  * @Date: 2023-05-04 12:43:16
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-04 18:45:40
- * @FilePath: /Geecache/main.go
+ * @LastEditTime: 2023-05-05 11:56:49
+ * @FilePath: /TinyCacheByGo/main.go
  */
 package main
 
@@ -32,7 +32,7 @@ func createGroup() *geecache.Group {
 		}))
 }
 
-func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
+/*func startCacheServer(addr string, addrs []string, gee *geecache.Group) {
 	peers := geecache.NewHTTPPool(addr)
 	peers.Set(addrs...)
 	gee.RegisterPeers(peers)
@@ -82,4 +82,59 @@ func main() {
 		go startAPIServer(apiAddr, gee)
 	}
 	startCacheServer(addrMap[port], []string(addrs), gee)
+}
+*/
+func startAPIServer(apiAddr string, gee *geecache.Group) {
+	http.Handle("/api", http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			key := r.URL.Query().Get("key")
+			view, err := gee.Get(key)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Write(view.ByteSlice())
+
+		}))
+	log.Println("fontend server is running at", apiAddr)
+	log.Fatal(http.ListenAndServe(apiAddr[7:], nil))
+
+}
+func startCacheServerGrpc(addr string, addrs []string, gee *geecache.Group) {
+	peers := geecache.NewGrpcPool(addr)
+	peers.Set(addrs...)
+	gee.RegisterPeers(peers)
+	log.Println("geecache is running at", addr)
+	peers.Run()
+}
+
+func startGRPCServer() {
+	var port int
+	var api bool
+	flag.IntVar(&port, "port", 8001, "Geecache server port")
+	flag.BoolVar(&api, "api", false, "Start a api server?")
+	flag.Parse()
+
+	apiAddr := "http://localhost:9999"
+	addrMap := map[int]string{
+		8001: ":8001",
+		8002: ":8002",
+		8003: ":8003",
+	}
+
+	var addrs []string
+	for _, v := range addrMap {
+		addrs = append(addrs, v)
+	}
+
+	gee := createGroup()
+	if api {
+		go startAPIServer(apiAddr, gee)
+	}
+	startCacheServerGrpc(addrMap[port], addrs, gee)
+}
+
+func main() {
+	startGRPCServer()
 }

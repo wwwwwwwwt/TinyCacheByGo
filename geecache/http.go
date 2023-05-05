@@ -2,20 +2,23 @@
  * @Author: zzzzztw
  * @Date: 2023-05-04 10:55:11
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-04 16:13:04
- * @FilePath: /Geecache/geecache/http.go
+ * @LastEditTime: 2023-05-05 12:01:42
+ * @FilePath: /TinyCacheByGo/geecache/http.go
  */
 package geecache
 
 import (
 	"fmt"
 	"geecache/consistenthash"
+	pb "geecache/geecachepb"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
+
+	"github.com/golang/protobuf/proto"
 )
 
 const defaultPath = "/_geecache/"
@@ -41,37 +44,41 @@ func (p *HTTPPOOL) Log(format string, v ...interface{}) {
 }
 
 func (p *HTTPPOOL) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	// 前面路径就不对
 	if !strings.HasPrefix(r.URL.Path, p.basePath) {
 		panic("HTTPPool serving unexpected path: " + r.URL.Path)
 	}
-
 	p.Log("%s %s", r.Method, r.URL.Path)
-
+	// /<basepath>/<groupname>/<key> required
 	parts := strings.SplitN(r.URL.Path[len(p.basePath):], "/", 2)
-
 	if len(parts) != 2 {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-	groupname := parts[0]
+
+	groupName := parts[0]
 	key := parts[1]
 
-	group := GetGroup(groupname)
-
+	group := GetGroup(groupName)
 	if group == nil {
-		http.Error(w, "no such group"+groupname, http.StatusNotFound)
+		http.Error(w, "no such group: "+groupName, http.StatusNotFound)
+		return
 	}
 
 	view, err := group.Get(key)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Write the value to the response body as a proto message.
+	body, err := proto.Marshal(&pb.Response{Value: view.ByteSlice()})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(view.ByteSlice())
-
+	w.Write(body)
 }
 
 //-------------------------------------------------------------------------
@@ -81,28 +88,33 @@ type httpGetter struct {
 	baseURL string // 即将访问的远程节点的地址，http://example.com/_geecache/group名
 }
 
-func (h *httpGetter) Get(group string, key string) ([]byte, error) {
-	u := fmt.Sprintf("%v%v/%v", h.baseURL, url.QueryEscape(group), url.QueryEscape(key)) //向服务端发送 http://节点地址peer/_geecache/group名字/key
-
-	res, err := http.Get(u) // 得到响应报文
-
+func (h *httpGetter) Get(in *pb.Request, out *pb.Response) error {
+	u := fmt.Sprintf(
+		"%v%v/%v",
+		h.baseURL,
+		url.QueryEscape(in.GetGroup()),
+		url.QueryEscape(in.GetKey()),
+	)
+	res, err := http.Get(u)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("server returned: %v", res.Status)
+		return fmt.Errorf("server returned: %v", res.Status)
 	}
 
 	bytes, err := ioutil.ReadAll(res.Body)
-
 	if err != nil {
-		return nil, fmt.Errorf("reading response body: %v", err)
+		return fmt.Errorf("reading response body: %v", err)
 	}
 
-	return bytes, nil
+	if err = proto.Unmarshal(bytes, out); err != nil {
+		return fmt.Errorf("decoding response body: %v", err)
+	}
+
+	return nil
 }
 
 var _ PeerGetter = (*httpGetter)(nil)

@@ -2,13 +2,14 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 22:44:01
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-05 08:45:36
- * @FilePath: /Geecache/geecache/geecache.go
+ * @LastEditTime: 2023-05-05 11:46:31
+ * @FilePath: /TinyCacheByGo/geecache/geecache.go
  */
 package geecache
 
 import (
 	"fmt"
+	pb "geecache/geecachepb"
 	"geecache/lru"
 	"geecache/singleflight"
 	"log"
@@ -133,11 +134,16 @@ func (g *Group) load(key string) (value ByteView, err error) {
 }
 
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
-	bytes, err := peer.Get(g.name, key)
+	req := &pb.Request{
+		Group: g.name,
+		Key:   key,
+	}
+	res := &pb.Response{}
+	err := peer.Get(req, res)
 	if err != nil {
 		return ByteView{}, err
 	}
-	return ByteView{b: bytes}, nil
+	return ByteView{b: res.Value}, nil
 }
 
 func (g *Group) getLocally(key string) (ByteView, error) {
