@@ -3,8 +3,8 @@
  # @Author: zzzzztw
  # @Date: 2023-05-04 18:45:53
  # @LastEditors: Do not edit
- # @LastEditTime: 2023-05-05 08:46:56
- # @FilePath: /Geecache/run.sh
+ # @LastEditTime: 2023-05-05 11:05:05
+ # @FilePath: /TinyCacheByGo/run.sh
 ### 
 trap "rm server;kill 0" EXIT
 
@@ -38,4 +38,97 @@ curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=To
 curl "http://localhost:9999/api?key=Tom" &
 curl "http://localhost:9999/api?key=Tom" &
 curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+curl "http://localhost:9999/api?key=Tom" &
+
 wait

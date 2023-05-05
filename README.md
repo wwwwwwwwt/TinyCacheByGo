@@ -2,7 +2,7 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 14:29:18
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-02 22:34:16
+ * @LastEditTime: 2023-05-05 11:22:32
  * @FilePath: /TinyCacheByGo/README.md
 -->
 # 基于Go的简易分布式缓存框架🚀
@@ -37,5 +37,11 @@ geecache/
     |--cache.go    // 并发控制
     |--geecache.go // 负责与外部交互，控制缓存存储和获取的主流程
 
+
+```
+
+编译protobuf生成grpc
+```shell
+protoc -I. --go_out=. --go-grpc_out geecachepb/*.proto
 
 ```
