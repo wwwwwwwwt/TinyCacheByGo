@@ -93,7 +93,7 @@ func (p *GrpcPool) Get(ctx context.Context, in *pb.Request) (*pb.Response, error
 }
 
 func (p *GrpcPool) Run() {
-	lis, err := net.Listen("tcp", p.self)
+	lis, err := net.Listen("tcp", "127.0.0.1"+p.self)
 	if err != nil {
 		panic(err)
 	}

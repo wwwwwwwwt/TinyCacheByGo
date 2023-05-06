@@ -2,7 +2,7 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 14:29:18
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-05 17:39:19
+ * @LastEditTime: 2023-05-06 11:08:10
  * @FilePath: /TinyCacheByGo/README.md
 -->
 # 基于Go的简易分布式缓存框架🚀
@@ -55,7 +55,7 @@ geecache/
 
 ### 一次查询key的逻辑
 
-```
+```shell
 //每执行一次main函数就是起一个节点服务                 本地用户交互前端连接绑定了一个gee节点，其余节点皆为单纯gee缓存数据节点
 // Overall flow char										     requsets			先看local有没有		        local
 // gee := createGroup() --------> /api Service : 9999 ---------------------------> gee.Get(key) ------> g.mainCache.Get(key)
@@ -421,5 +421,141 @@ func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 	return ByteView{b: bytes}, nil
 }
 
-
 ```
+
+
+### 6. 防止缓存击穿
+
+- 核心思路：用锁和哈希表记录当前正在处理的key，使load函数只执行一次
+
+```go
+func (g *Group) Do(key string, fn func() (interface{}, error)) (interface{}, error) {
+	g.mu.Lock()
+	// 懒初始化
+	if g.m == nil {
+		g.m = make(map[string]*call)
+	}
+
+	// 如果当前map有key了，说明这个key正在执行，不需要再继续请求了等待结果就行
+	if c, ok := g.m[key]; ok {
+		g.mu.Unlock()
+		c.wg.Wait()
+		return c.val, c.err
+	}
+
+	//否则创建一个请求，并加入mp
+	c := new(call)
+	c.wg.Add(1)
+	g.m[key] = c
+
+	g.mu.Unlock()
+	//等待请求执行完，则Done通知所有wait的
+	c.val, c.err = fn()
+	c.wg.Done()
+	time.Sleep(50 * time.Millisecond) //这一行逻辑有点问题，在上锁删除后，如果有此时有另外一个携程在等待上锁时，这个key的请求删除后，那个协程会认为这个key不在，继续请求
+	g.mu.Lock()
+	delete(g.m, key)
+	g.mu.Unlock()
+	return c.val, c.err
+}
+```
+
+### 7. 使用protobuf与grpc通信
+
+- 整体思路和http的相同，需要注意的是使用grpc的格式等。
+- 定义了protobuf中两个字段，request中包括我们需要得到的group和key，response是我们需要的value
+- 流程：前端ip收到查询请求->查看本地节点缓存（geecache.get()）-> 没有的华进入load->进入g.peers.Pickpeer查询该key应该落在哪个真实节点，并得到该节点ip：port->传入getFromPeer进入远程查询逻辑->按照定义的proto写好数据库group名字与查询的key的Request与用于接受响应的response，使用节点的Get与远程节点通信->进入grpc之间通讯的逻辑，Dial建立连接，并建立一个客户端用于这个链接，客户端使用我们自定义的Get方法将Request传入得到结果-> grpc节点收到请求，
+- server与client的基本处理格式
+
+```go
+//server端：
+//1.将grpc绑定一个ip地址，把业务起来
+func (p *GrpcPool) Run() {
+	lis, err := net.Listen("tcp", "127.0.0.1"+p.self)
+	if err != nil {
+		panic(err)
+	}
+
+	server := grpc.NewServer()
+	pb.RegisterGroupCacheServer(server, p)
+
+	reflection.Register(server) // 使用curl调试必须使用反射
+	err = server.Serve(lis)
+	if err != nil {
+		panic(err)
+	}
+}
+//2.实现我们在proto中定义的接口函数， 用于客户端和服务端通信
+service GroupCache {
+    rpc Get(Request) returns (Response);
+}
+
+func (p *GrpcPool) Get(ctx context.Context, in *pb.Request) (*pb.Response, error) {
+	p.Log("%s %s", in.Group, in.Key)
+	response := &pb.Response{}
+
+	group := GetGroup(in.Group)
+	if group == nil {
+		p.Log("no such group %v", in.Group)
+		return response, fmt.Errorf("no such group %v", in.Group)
+	}
+	value, err := group.Get(in.Key)
+	if err != nil {
+		p.Log("get key %v error %v", in.Key, err)
+		return response, err
+	}
+
+	response.Value = value.ByteSlice()
+	return response, nil
+}
+
+
+// 3.实现client端：
+// 建立连接，调取方法返回给上层
+func (p *GrpcPool) Get(ctx context.Context, in *pb.Request) (*pb.Response, error) {
+	p.Log("%s %s", in.Group, in.Key)
+	response := &pb.Response{}
+
+	group := GetGroup(in.Group)
+	if group == nil {
+		p.Log("no such group %v", in.Group)
+		return response, fmt.Errorf("no such group %v", in.Group)
+	}
+	value, err := group.Get(in.Key)
+	if err != nil {
+		p.Log("get key %v error %v", in.Key, err)
+		return response, err
+	}
+
+	response.Value = value.ByteSlice()
+	return response, nil
+}
+
+// 上层逻辑：
+// 从远程节点获取key的缓存
+func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
+	req := &pb.Request{
+		Group: g.name,
+		Key:   key,
+	}
+	res := &pb.Response{}
+	err := peer.Get(req, res)
+	if err != nil {
+		return ByteView{}, err
+	}
+	return ByteView{b: res.Value}, nil
+}
+
+func (g *Group) getLocally(key string) (ByteView, error) {
+	bytes, err := g.getter.Get(key)
+
+	if err != nil {
+		return ByteView{}, err
+	}
+
+	val := ByteView{b: cloneByte(bytes)}
+	g.populateCache(key, val)
+	return val, nil
+}
+```
+
