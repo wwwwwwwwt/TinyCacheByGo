@@ -2,7 +2,7 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 14:29:18
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-06 11:08:10
+ * @LastEditTime: 2023-05-06 11:10:25
  * @FilePath: /TinyCacheByGo/README.md
 -->
 # 基于Go的简易分布式缓存框架🚀
@@ -546,16 +546,5 @@ func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
 	return ByteView{b: res.Value}, nil
 }
 
-func (g *Group) getLocally(key string) (ByteView, error) {
-	bytes, err := g.getter.Get(key)
-
-	if err != nil {
-		return ByteView{}, err
-	}
-
-	val := ByteView{b: cloneByte(bytes)}
-	g.populateCache(key, val)
-	return val, nil
-}
 ```
 
