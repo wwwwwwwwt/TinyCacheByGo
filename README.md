@@ -2,8 +2,8 @@
  * @Author: zzzzztw
  * @Date: 2023-05-02 14:29:18
  * @LastEditors: Do not edit
- * @LastEditTime: 2023-05-06 11:10:25
- * @FilePath: /TinyCacheByGo/README.md
+ * @LastEditTime: 2023-05-13 17:22:40
+ * @FilePath: /zhang/TinyCacheByGo/README.md
 -->
 # 基于Go的简易分布式缓存框架🚀
 
@@ -93,7 +93,7 @@ geecache/
 - 编译protobuf生成grpc,网上有些教程的编译语句已经过时了，注意辨别，实际生产中可以编写一份shell脚本来自动化编译
 
 ```shell
-protoc -I. --go_out=. --go-grpc_out geecachepb/*.proto
+protoc -I. --go_out=. --go-grpc_out=. geecachepb/*.proto
 ```
 ---
 # 代码逻辑结构详细说明
